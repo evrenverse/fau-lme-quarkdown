@@ -8,6 +8,17 @@
 
 A Quarkdown theme that reproduces the look of the FAU Pattern Recognition Lab (LME) LaTeX thesis template (`lmedoc.cls`), for students at the Lehrstuhl für Mustererkennung who want to write their thesis or project work (Projektarbeit, Forschungspraktikum, Studienarbeit) in [Quarkdown](https://github.com/iamgio/quarkdown) instead of LaTeX.
 
+<p align="center">
+  <img src="docs/preview/cover.png" alt="Thesis cover rendered by the theme: FAU and Pattern Recognition Lab logos, centred title, thesis type, author, chair block and advisor trailer" width="46%">
+  &nbsp;&nbsp;
+  <img src="docs/preview/title-slide.png" alt="Title slide rendered by the slides layer, with the institution band, logo slots and left-aligned title block" width="46%">
+</p>
+
+<p align="center">
+  <sub>Both rendered from <code>example/</code> and <code>example-slides/</code> — build them yourself with <code>scripts/test.sh</code>.<br>
+  The slide artwork is a placeholder; see <a href="assets/LOGO-PROVENANCE.md">LOGO-PROVENANCE.md</a>.</sub>
+</p>
+
 ## What you get
 
 - A4 twoside, 12 pt Latin Modern Roman (`LM Roman 12`, resolved by fontconfig to the glyph-compatible `CMU Serif` Computer Modern Unicode rebuild — what `lmedoc.cls` + `lmodern` actually renders), 1.5 line spacing.
