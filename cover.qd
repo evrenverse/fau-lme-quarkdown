@@ -1,0 +1,98 @@
+<!-- .lmecover: FAU-LME paged-document cover.
+     All parameters required except coinstitute (optional ZweitInstitut block —
+     renders an "in Cooperation with X" line below the institution block when set)
+     and advisor/started/finished (the bottom trailer block — omit all three for
+     covers without it, e.g. a Projektarbeit).
+
+     Typography mirrors lmedoc.cls \deckblatt (lines 84-163):
+       - Title       \Large\bfseries  =>  17.28 pt bold
+       - Thesis type \large\bfseries   =>  14.4  pt bold
+       - everything else \normalsize   =>  12    pt regular (incl. author name)
+       - whole cover single-spaced (\baselinestretch=1.0 inside \bgroup) -->
+.function {lmecover}
+    title author birthdate birthplace doctype advisor? started? finished? coinstitute?:
+
+    <!-- Page-1 geometry: tighter top margin to let the logos sit high (matches LaTeX \vspace*{-4cm}) -->
+    .pageformat pages:{..1} margin:{2.0cm 2.4cm 3.0cm 2.4cm}
+
+    <!-- Reserve a `bottomcenter` slot on the cover. The actual page-number
+         suppression for page 1 is done in styles.css via
+         `.pagedjs_page[data-page-number="1"] .page-margin-content { display: none }`,
+         since Quarkdown's `.pagemargin` has no per-page filter and standard
+         `@page :first` rules don't apply to PagedJS-rendered margin content. -->
+    .pagemargin {bottomcenter}
+        &nbsp;
+
+    .container fullwidth:{yes} margin:{0} classname:{lmecover}
+
+        <!-- Logo row: FAU TechFak left, LME right, 6 cm gap, top-aligned.
+             The two `!(...)[alt](path)` children must sit on consecutive
+             lines (no blank line between) — a blank line inside a Quarkdown
+             `.row` is interpreted as a paragraph separator and pushes the
+             second logo onto a new row instead of keeping them side-by-side. -->
+        .row gap:{6cm} cross:{start}
+            !(5.5cm)[Friedrich-Alexander-Universität Erlangen-Nürnberg, Technische Fakultät](assets/logo-fau-techfak.png)
+            !(5.5cm)[Lehrstuhl für Mustererkennung, Friedrich-Alexander-Universität Erlangen-Nürnberg](assets/logo-lme.png)
+
+        .whitespace height:{1.6cm}
+
+        .align {center}
+            <!-- Title: LaTeX \Large\bfseries = 17.28 pt. Quarkdown `large` is the
+                 closest named size (~1.44× base 12 pt). Pixel-tuned via CSS rule
+                 `.lmecover .size-large` in styles.css if the named size drifts. -->
+            .text {.title} size:{large} weight:{bold}
+
+            .whitespace height:{1.2cm}
+
+            <!-- Thesis type: LaTeX \large\bfseries = 14.4 pt. Quarkdown `medium`
+                 (~1.2× base) is the closest named size. -->
+            .text {.localize {lme:thesistype_.doctype}} size:{medium} weight:{bold}
+
+            .whitespace height:{1.0cm}
+
+            <!-- "submitted by" / "vorgelegt von" — single localization key.
+                 LaTeX renders these on two lines (\\) but in normal weight. -->
+            .localize {lme:submitted_by}
+
+            .whitespace height:{0.5cm}
+
+            <!-- Author name: rendered bold per user request. (LaTeX `\deckblatt`
+                 actually renders \@Vorname\ \@Name in `\normalsize` without
+                 `\bfseries`; we deviate from the LaTeX reference here because
+                 the visual emphasis on the candidate's name is preferable on
+                 a thesis cover.) -->
+            .text {.author} weight:{bold}
+
+            .whitespace height:{0.3cm}
+
+            .localize {lme:born_on} .birthdate .localize {lme:born_in} .birthplace
+
+            .whitespace height:{2.5cm}
+
+            .localize {lme:written_at} .br
+            .text {.localize {lme:lehrstuhl}} weight:{bold} .br
+            .localize {lme:department} .br
+            .localize {lme:university}
+
+        <!-- Optional ZweitInstitut block; only render when coinstitute is set. -->
+        .ifnot {.coinstitute::isnone}
+            .align {center}
+                .whitespace height:{0.8cm}
+                .localize {lme:in_cooperation} .br
+                .coinstitute
+
+        .whitespace height:{4.5cm}
+
+    <!-- Trailer (advisor / started / finished): sits low on the cover, mirroring
+         the LaTeX flushleft block (lmedoc.cls:157-161). A paragraph gap sets the
+         advisor line apart; started and finished follow on their own lines.
+         Rendered only when advisor is set (started/finished are read only
+         inside this gate). -->
+    .ifnot {.advisor::isnone}
+        .container classname:{lmecover-trailer}
+            .localize {lme:advisor}: .advisor
+
+            .whitespace height:{0.4cm}
+
+            .localize {lme:started}: .started .br
+            .localize {lme:finished}: .finished

@@ -1,0 +1,3 @@
+<!-- LME convention: captions below figures, above tables.
+     Code-block captions go below (matches paragraph flow). -->
+.captionposition {bottom} figures:{bottom} tables:{top} code:{bottom}

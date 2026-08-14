@@ -1,0 +1,36 @@
+name: Bug report
+description: Report a reproducible problem with the theme or its scripts
+title: "bug: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: Do not attach an unpublished thesis, personal data, or unreleased institution assets. Reduce the problem to a minimal `.qd` file.
+  - type: input
+    id: version
+    attributes:
+      label: Theme version
+      placeholder: 0.3.1 (see theme.json or CHANGELOG.md)
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      placeholder: Quarkdown version, operating system, Python version, installed fonts
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Reproduction
+      description: The minimal `.qd` source, the exact build command, and what the output looked like.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected result
+      description: If the LaTeX template (`lmedoc.cls`) renders it differently, say how.
+    validations:
+      required: true

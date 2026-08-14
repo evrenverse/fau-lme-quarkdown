@@ -1,0 +1,13 @@
+<!-- .lmebibliography {file} — theme-owned bibliography wrapper.
+     Internally calls .bibliography with the theme's custom CSL alpha style.
+     Consumers don't need to know the CSL path.
+
+     Path convention: the CSL file path is resolved relative to this file's
+     directory (themes/fau-lme/). -->
+
+.function {lmebibliography}
+    file:
+    .bibliography {../../.file} \
+        style:{lme-alpha} \
+        title:{References} \
+        indexheading:{true}

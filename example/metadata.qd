@@ -1,0 +1,8 @@
+.docname {Example Thesis Title for the FAU-LME Quarkdown Theme}
+.docauthor {Sample Author}
+.doclang {english}
+
+.pageformat size:{A4} margin:{3.8cm 2.8cm 4.0cm 2.0cm} side:{right}
+.pageformat size:{A4} margin:{3.8cm 2.0cm 4.0cm 2.8cm} side:{left}
+
+.font main:{LM Roman 12} heading:{LM Roman 12} size:{12pt}

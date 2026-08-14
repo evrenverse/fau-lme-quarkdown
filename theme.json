@@ -1,0 +1,42 @@
+{
+  "name": "fau-lme",
+  "version": "0.1.0",
+  "description": "Quarkdown theme that mirrors the FAU Pattern Recognition Lab (LME) thesis LaTeX template (lmedoc.cls 2023).",
+  "license": "MIT",
+  "homepage": "https://github.com/evrenverse/fau-lme-quarkdown",
+  "entry": "loader.qd",
+  "quarkdown": {
+    "tested": [
+      "2.3.1",
+      "2.5.1"
+    ],
+    "minimum": "2.0.0"
+  },
+  "doctype": "paged",
+  "language": [
+    "en",
+    "de"
+  ],
+  "doctypes": [
+    "mt",
+    "bt",
+    "sa",
+    "pa",
+    "fp",
+    "diss"
+  ],
+  "fonts": {
+    "main": "LM Roman 12",
+    "fallback": "CMU Serif"
+  },
+  "assets": {
+    "csl": "assets/csl/lme-alpha.csl",
+    "images": [
+      "assets/logo-fau-techfak.png",
+      "assets/logo-lme.png",
+      "assets/logo-prl.png",
+      "assets/logo-fau-wortmarke.svg",
+      "assets/slides-title-bg.jpg"
+    ]
+  }
+}

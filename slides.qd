@@ -1,0 +1,118 @@
+<!-- FAU-LME slides layer.
+     Consumers (a `.doctype {slides}` document) include THIS file instead of
+     loader.qd. Structural base is Quarkdown's stock `beamer` layout theme;
+     slides.css re-skins it to the FAU corporate design (style guide 2021).
+     Keep this loader doctype-agnostic: the consumer sets `.doctype {slides}`. -->
+.theme color:{paperwhite} layout:{beamer}
+
+<!-- Inline-arg form, NOT body form (same Quarkdown bug as loader.qd). -->
+.css {.read {slides.css}}
+
+<!-- Slide-geometry workaround (Quarkdown 2.3.1): `.pageformat width/height`
+     is emitted as a CSS `@page` size but never forwarded into
+     `Reveal.initialize`, so Reveal lays out slides on its 960x700 default
+     and, in print/PDF mode, overrides the page size accordingly. This shim
+     wraps `Reveal.initialize` before the framework's DOMContentLoaded init
+     runs and injects the real canvas size, read back from Quarkdown's own
+     emitted `@page` rule (fallback: 1280x720). Remove once upstream passes
+     the size through. Also forces controls/progress off (theme default).
+     Second prong: on screen the deck renders as a FIXED page stage — the
+     `.reveal` element stays at exact canvas size (Quarkdown pins it),
+     Reveal's inner scaling is locked to 1, and one uniform transform
+     scales the whole stage to the window. That captures the page-margin
+     layer (header logos, footer rule, date/page number), which Quarkdown
+     mounts on the slide backgrounds OUTSIDE Reveal's scaled `.slides`
+     container: with Reveal's stock scale-to-fit, content scaled while
+     margins stayed at native pixels (worst in speaker-view panes). The
+     single stage transform scales content + margins as one unit — same
+     behaviour as a PDF viewer fitting the page. Print/PDF export
+     (`?print-pdf` → `html.print-pdf`) is excluded and keeps Quarkdown's
+     fixed print geometry. -->
+.html
+    <style>
+    @media screen {
+        html:not(.print-pdf) body.quarkdown-slides.quarkdown-slides {
+            overflow: hidden;
+        }
+        html:not(.print-pdf) body.quarkdown-slides.quarkdown-slides .reveal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(var(--lme-page-fit, 1));
+            overflow: hidden;
+        }
+    }
+    </style>
+    <script>
+    (function () {
+        let w = 1280, h = 720;
+        for (const sheet of document.styleSheets) {
+            let rules;
+            try { rules = sheet.cssRules; } catch (e) { continue; }
+            for (const rule of rules) {
+                if (rule instanceof CSSPageRule) {
+                    const m = rule.style.getPropertyValue("size")
+                        .match(/([\d.]+)px\s+([\d.]+)px/);
+                    if (m) { w = parseFloat(m[1]); h = parseFloat(m[2]); }
+                }
+            }
+        }
+        const isPrint = /print-pdf/gi.test(window.location.search);
+        const init = Reveal.initialize.bind(Reveal);
+        // Force-override the framework config: Quarkdown's own init values
+        // must not undo the canvas size; controls/progress are off by theme
+        // design (fau-beamer look, keyboard navigation unaffected). On
+        // screen, margin/minScale/maxScale lock Reveal's inner scale to 1
+        // so the outer stage transform is the only scaling; print keeps
+        // Reveal's own export layout untouched.
+        Reveal.initialize = (config) =>
+            init(Object.assign({}, config, {
+                width: w, height: h,
+                controls: false, progress: false,
+            }, isPrint ? {} : { margin: 0, minScale: 1, maxScale: 1 }));
+        if (!isPrint) {
+            // Uniform fit-to-window for the fixed page stage (PDF-viewer
+            // behaviour). --lme-page-w feeds page-width-based CSS (e.g.
+            // the footer rule) that must not depend on viewport units.
+            document.documentElement.style.setProperty(
+                "--lme-page-w", w + "px");
+            const fit = () => document.documentElement.style.setProperty(
+                "--lme-page-fit",
+                Math.min(window.innerWidth / w, window.innerHeight / h));
+            window.addEventListener("resize", fit);
+            fit();
+        }
+    })();
+    </script>
+
+<!-- KaTeX macros (\vec, \mat, ...) — same math language as the thesis. -->
+.include {math.qd}
+
+<!-- Title slide function -->
+.include {titlecard.qd}
+
+<!-- Slide margins, official LME template: PRL + FAU Wortmarke top-right,
+     footer rule with "Technische Fakultät" left and date + slide number
+     right (styling in slides.css). Page margins are scoped: they take
+     effect from the slide where they are declared onward — call this on
+     the first content slide so the title slide stays margin-free.
+     CAUTION (empirically proven by the consumer deck): margin persistence
+     is REPLACE-ALL per declaring slide. A slide that declares ANY margin
+     (e.g. a .footer bar) drops all zones persisted from earlier slides,
+     so such slides must call this function again alongside their own
+     margin content. -->
+.function {lmeslidesfooter}
+    date:
+    .pagemargin {topright}
+        .container classname:{lmeheadlogos}
+            !(2.9cm)[Pattern Recognition Lab](assets/logo-prl.png)
+
+            !(2.2cm)[FAU](assets/logo-fau-wortmarke.svg)
+
+    .pagemargin {bottomleft}
+        Technische Fakultät
+
+    .pagemargin {bottomright}
+        .date
+
+        .currentpage

@@ -1,0 +1,33 @@
+name: Feature request
+description: Propose a focused improvement to the theme
+title: "feat: "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What is awkward or impossible when writing a document with this theme today?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed behavior
+      description: Include the suggested call syntax and how it should render.
+    validations:
+      required: true
+  - type: textarea
+    id: reference
+    attributes:
+      label: LaTeX reference
+      description: Does `lmedoc.cls` already do this? If so, how? If not, why should the theme go beyond it?
+  - type: checkboxes
+    id: scope
+    attributes:
+      label: Scope check
+      options:
+        - label: This belongs in the theme, not in a single consuming project.
+          required: true
+        - label: It needs no institution assets beyond those already in `assets/`.
+          required: true

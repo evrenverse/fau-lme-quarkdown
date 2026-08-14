@@ -1,0 +1,49 @@
+.doctype {slides}
+.docname {FAU-LME Slides Example}
+.docauthor {Sample Author}
+.doclang {english}
+
+<!-- 16:9. Quarkdown slides default to landscape; explicit px size keeps
+     reveal.js scaling predictable (1280x720 = reveal's canonical 16:9). -->
+.pageformat width:{1280px} height:{720px}
+
+<!-- Fonts (Latin Modern Sans) come from the theme: slides.css sets
+     font-family directly on the reveal content roots. No `.font` call here:
+     it emits an exact-name local() lookup the print browser cannot resolve
+     for this family. -->
+
+.include {../slides.qd}
+
+.slides transition:{none}
+
+.lmetitlecard \
+    title:{FAU-LME Slides Example} \
+    author:{Sample Author} \
+    event:{Master's Thesis Colloquium} \
+    advisor:{Advisor Name} \
+    chair:{Pattern Recognition Lab, Friedrich-Alexander-Universität Erlangen-Nürnberg} \
+    date:{July 9, 2026}
+
+# Agenda
+
+<!-- Footer from this slide onward (margin content applies from its declaring
+     slide); the title slide before this heading stays footer-free. -->
+.lmeslidesfooter date:{July 9, 2026}
+
+- Motivation
+- **Approach** (bold renders in FAU blue)
+- Results
+
+# Fragments and math
+
+Inline math with theme macros: $ \mat{A} \vec{x} = \vec{b} $
+
+.fragment
+    This line appears on the second interaction step.
+
+.speakernote
+    Speaker note: visible in speaker view (S), not on the slide.
+
+# Closing slide
+
+Final slide with a [link](https://www.fau.de) in FAU blue.

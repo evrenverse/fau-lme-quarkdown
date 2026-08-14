@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Placeholder wordmark. Replace with your own institution's asset,
+     keeping the viewBox so the slide layouts keep their proportions. -->
+<svg xmlns="http://www.w3.org/2000/svg" width="601.059998pt" height="282.570007pt"
+     viewBox="0 0 601.059998 282.570007">
+  <rect x="6" y="6" width="589" height="270" fill="none" stroke="#787878" stroke-width="5"/>
+  <text x="300.5" y="155" font-family="sans-serif" font-size="46" fill="#787878"
+        text-anchor="middle">YOUR WORDMARK</text>
+</svg>

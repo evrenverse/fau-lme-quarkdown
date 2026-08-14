@@ -1,0 +1,18 @@
+# Python (postprocessor bytecode + test cache)
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Quarkdown / build output
+output/
+output-html*/
+.quarkdown/
+quarkdown-output/
+
+# OS / editor
+.DS_Store
+*.swp
+*~
+
+# Local project card — not part of the published repository.
+PROJECT.md

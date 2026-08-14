@@ -1,0 +1,879 @@
+/* FAU LME Pattern Recognition Lab — Quarkdown theme CSS.
+ *
+ * Loaded by themes/fau-lme/loader.qd via .css {.read {themes/fau-lme/styles.css}}
+ * (inline-arg form — see "Quarkdown-specific gotchas" in the README on why
+ * the body form .css\n    .read {...} does NOT work).
+ *
+ * This is the ONLY source of theme CSS — no inline CSS in loader.qd.
+ *
+ * Selectors are prefixed with .quarkdown to outrank stock-theme specificity.
+ * Stock-theme link color is driven by --qd-link-color; we override that
+ * variable to FAU-blue and add specialized rules for external URLs.
+ */
+
+.quarkdown {
+  /* FAU brand palette */
+  --fau-blue:      #003366;
+  --fau-magenta:   #e6007e;
+  --fau-lightblue: #04316a;
+
+  /* Re-target the stock theme's link-color variable to FAU-blue.
+     This propagates to all internal links (ToC, headings, cross-refs, citations). */
+  --qd-link-color: var(--fau-blue);
+
+  /* Code-listing density. Quarkdown defaults --qd-code-block-font-size to the
+     main 12 pt body size, which is too loud for dense JSON listings (Ch.6).
+     Pin block listings to 9 pt / 1.3 line-height — distinct from the 10.5 pt
+     inline-code size (rule below) so a multi-line listing reads as a quieter,
+     denser block than an inline identifier. */
+  --qd-code-block-font-size: 9pt;
+  --qd-code-line-height: 1.3;
+}
+
+/* Disable f-ligatures (fi/fl/ff/ffi/ffl). Computer Modern's `liga` feature
+   fuses these pairs into single glyphs (the f-bowl swallows the i-dot), which
+   is classic TeX typesetting but reads as a rendering defect on paper at
+   print resolution. Author decision: keep f, i, l as separate letters.
+   The property inherits document-wide, including inline SVG text. */
+.quarkdown { font-variant-ligatures: none; }
+
+/* External URLs: FAU-magenta. `a[href^="http"]` matches both http and https
+   (prefix selector is greedy by char-count). Attribute selectors outrank the
+   stock 'a { color: ... }' rule, so no !important is needed. */
+.quarkdown a[href^="http"] { color: var(--fau-magenta); }
+
+/* Internal links (cross-references to chapters, sections, figures, citations
+   inside the same document) — render in body color with NO underline, so a
+   prose phrase like "Chapter 3" reads as one visual unit instead of as
+   "Chapter" + an underlined "3". Quarkdown emits internal links as
+   `<a href="#id">` (hash-prefixed); external URLs use `href="http..."` and
+   keep their distinctive magenta-coloured underlined look from the rule above.
+   Reason: LME LaTeX template renders \ref/\autoref unstyled (same as body
+   text); we mirror that for print parity but keep clickability in the PDF. */
+.quarkdown a[href^="#"] {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* Cross-references: suppress Quarkdown's `[data-location]::before` rule
+   (lib/html/theme/global.css:`content: attr(data-localized-kind) " "
+   attr(data-location)`) once the postprocessor has materialised the same
+   text into the span's DOM textContent.
+
+   Background: PagedJS measures inline line widths from DOM textContent.
+   A `<span class="cross-reference">` whose visible glyphs are injected
+   via CSS `content: attr(...)` is sized as width 0 during pagination,
+   so PagedJS over-packs the surrounding line. The painted glyphs then
+   overflow the printable area and Chromium's `page.pdf()` silently
+   clips them — observable as mid-paragraph text loss across page
+   boundaries that contain a cross-reference. Verified empirically:
+   ~17 words disappeared from the PDF between two pages despite being
+   present in the rendered HTML.
+
+   Fix in two parts: (i) `postprocess_links/crossrefs.py` writes the
+   rendered text into the span's textContent, marking it with
+   `data-text-materialised="1"`; (ii) this rule disables the now-
+   duplicate `::before` for any materialised span so the visible output
+   is unchanged but PagedJS sees the real line width. */
+.quarkdown .cross-reference[data-text-materialised]::before {
+  content: none !important;
+}
+
+/* Numbered display equations: render the location in LaTeX-conventional
+   parentheses, "(8.8)" instead of the bare "8.8" that Quarkdown emits.
+   Overrides global.css `.quarkdown formula[data-location]::before
+   { content: attr(data-location) }`; matches the amsmath equation-number
+   convention of the FAU-LME LaTeX reference template. */
+.quarkdown formula[data-location]::before {
+  content: "(" attr(data-location) ")";
+}
+
+/* Headline (boxed) equations: a modern rounded frame in place of KaTeX's
+   default thin tight \fbox. The headline metrics use `\boxed{…}` to stand out
+   from their building-block formulas; this restyles that box — rounded
+   corners, a 1.3 px black rule, and generous padding (vertical on the outer
+   .fbox, horizontal on .boxpad).
+   Overrides katex.min.css `.katex .fbox { border: .04em solid }` and
+   `.katex .boxpad { padding: 0 .3em }`; the extra `formula` descendant raises
+   specificity above the stock `.katex .fbox` rule. The Quarkdown equation
+   number stays outside the box (it is a `formula::before`, not part of the
+   KaTeX render).
+
+   NOTE: no `background` on `.fbox` — a fill there makes the boxed formula's
+   glyphs vanish in the Puppeteer print render (the KaTeX content ends up
+   behind the painted background). Border + padding only. */
+.quarkdown formula .fbox {
+  border-radius: 7px;
+  border-width: 1.3px;
+  border-color: #000;
+  padding-top: 0.3em;
+  padding-bottom: 0.3em;
+}
+/* Side padding goes on .boxpad; vertical padding goes on the OUTER .fbox.
+   VERTICAL padding on .boxpad itself breaks the KaTeX render (the formula
+   glyphs vanish), because KaTeX computes that inner box's height exactly. */
+.quarkdown formula .boxpad {
+  padding-left: 0.9em;
+  padding-right: 0.9em;
+}
+
+/* Bibliography: single-spaced per drichtl §2.1 ("Literaturverzeichnis: einfacher
+   Zeilenabstand"). LaTeX `\singlespacing` resolves to ~1.0 line-height with the
+   normal `\baselineskip` of 14.5 pt (at 12 pt body), which renders visually as
+   ~1.15 in CSS. We use 1.15 to keep descenders from clipping while still being
+   noticeably tighter than the body's 1.5 line-spacing. */
+.quarkdown .bibliography,
+.quarkdown .references,
+.quarkdown .csl-bib-body,
+.quarkdown [class*="bibliography"],
+.quarkdown [class*="references"] {
+  line-height: 1.15;
+}
+
+/* URL wrapping inside bibliography entries. `@online` / `URL = {…}` BibTeX
+   fields render as `<a>` with the full URL as link text — a single unbroken
+   token. Default `overflow-wrap: normal` only breaks at whitespace, so a
+   100-character URL is left as one word that pushes past the right page
+   margin and clips at the page edge.
+
+   Mirror the table-cell fix below: `overflow-wrap: anywhere` lets the
+   browser break mid-token; targets the entry-content span and any link
+   inside it. Hyphens off — we want a clean break at the next char, not
+   a typographic hyphen inserted into a URL. */
+.quarkdown .bibliography-entry-content,
+.quarkdown .bibliography-entry-content a,
+.quarkdown [class*="bibliography"] a {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  hyphens: none;
+}
+
+/* The citation back-reference label ([Sof26] -> first use) sits in a grid cell
+   (the bibliography is display:grid). Chromium otherwise emits the inline <a>
+   as several per-fragment link-annotation rectangles, so the label renders as
+   two separate clickable boxes (e.g. "[S" + "of26]"). display:inline-block
+   forces the link into one atomic box -> a single annotation rectangle. nowrap
+   plus the wrap resets keep a short alpha label on one piece. Specificity
+   (0,3,1) beats the [class*="bibliography"] a rule above. */
+.quarkdown [class*="bibliography"] a.bib-backref {
+  display: inline-block;
+  overflow-wrap: normal;
+  word-break: keep-all;
+  white-space: nowrap;
+}
+
+/* Body-text hyphenation OFF — FAU override of the Quarkdown base rule
+   `.quarkdown.quarkdown:not(.quarkdown-slides) p { hyphens: auto }`.
+   Rationale: PagedJS intermittently clips or splits a word that is auto-hyphenated
+   exactly across a page break, causing silent content loss in the PDF (observed:
+   "component" rendered as "onent" at a page top, the leading "comp" gone). With
+   `hyphens: manual`, page-break seams fall at word boundaries, which PagedJS
+   paginates cleanly (no fragment to drop). Justification stays on; the only cost is
+   slightly looser word spacing on lines with long German compounds. The extra
+   `.quarkdown` raises specificity above the base rule regardless of stylesheet order.
+   Detector for regressions: scripts/seam-check.py. */
+.quarkdown.quarkdown.quarkdown:not(.quarkdown-slides) p {
+  hyphens: manual;
+}
+
+/* Figure / table captions: italic, slightly smaller per LME convention */
+.quarkdown figcaption,
+.quarkdown caption {
+  font-style: italic;
+  font-size: 11pt;
+}
+
+/* A caption whose source contains an inline function call (.cite / .ref)
+   gets its text wrapped in a <p> by the renderer. As a block, that <p>
+   starts a new line after the "Figure N.M:" ::before label and renders
+   justified like body text. Inline it so such captions flow identically
+   to plain-text captions: one centred italic run after the label. */
+.quarkdown figcaption p,
+.quarkdown table:not(pre table) > caption p {
+  display: inline;
+  margin: 0;
+}
+
+/* Suppress auto-captions on glossary-style front-matter tables (Acronyms +
+   Notation). Quarkdown auto-numbers every markdown table as 'Table N.M' with N
+   = current chapter index; front-matter sits before chapter 1, so these get
+   'Table 0.1' / 'Table 0.2' — meaningless to readers since the tables aren't
+   cross-referenced. LaTeX renders them as glossary lists, also uncaptioned.
+
+   Heuristic: this rule hides ANY chapter-0 caption. If a future front-matter
+   table needs a real caption, wrap it in `.container classname:{captioned}`
+   and add a more specific override above this rule. */
+.quarkdown caption[data-location^="0."] {
+  display: none;
+}
+
+/* Booktabs-style tables: heavy top + bottom rule, lighter mid rule under header,
+   no vertical lines. Rule weights match the LaTeX `booktabs` package canonical
+   values at 12 pt body: `\toprule`/`\bottomrule` = 0.08em ≈ 1.0pt,
+   `\midrule` = 0.05em ≈ 0.6pt. We use absolute pt (not em) because the thesis
+   font-size is fixed at 12 pt — em-based would scale with any local font-size
+   change inside a callout/highlight block, which is not the booktabs convention. */
+/* ------------------------------------------------------------------------ *
+   Hard width cap for all block-level visual elements (tables, captions,
+   figures, images) — defends against a known Chromium/PagedJS quirk where
+   `<table>` with min-content > 100% and `<caption>` in `display:
+   table-caption` BOTH ignore percentage-based `max-width: 100%` and render
+   at their intrinsic max-content width, pushing past the right page margin.
+
+   The fix anchors every block element to the LME body text column width:
+
+       body width = A4 (21cm) − left margin (2.0cm) − right margin (2.8cm)
+                  = 16.2cm
+
+   If the LME page-margin layout ever changes (see `.pagemargin` in cover.qd
+   or wherever the page format is declared), update the value below to
+   `21cm − left − right`. Anything wider than 16.2cm wraps to a new line
+   (text/captions) or scales down (images via height:auto).
+ * ------------------------------------------------------------------------ */
+.quarkdown table,
+.quarkdown figure,
+.quarkdown figure img,
+.quarkdown figure svg,
+.quarkdown img,
+.quarkdown svg {
+  max-width: 16.2cm;
+  box-sizing: border-box;
+}
+
+.quarkdown table {
+  border-collapse: collapse;
+  width: 100%;
+  table-layout: auto;
+}
+
+/* Keep floats intact across page breaks. drichtl §1.6.3 expects each table
+   and figure to render as a single block with its caption attached. Without
+   this rule PagedJS splits the float wherever the page runs out, strands the
+   caption between the slices on the continuation page, and re-flows column
+   widths on the second slice against the now-shorter cell content — which
+   can break natural-language words mid-glyph as the auto-layout widens
+   the wrong column. LaTeX floats are unbreakable by definition; this rule
+   mirrors that. If a consuming project has a table that genuinely exceeds
+   one page, override per-table with `break-inside: auto` plus
+   `thead { display: table-header-group; }` for the longtable-style
+   header-repeat pattern. */
+.quarkdown table,
+.quarkdown figure {
+  break-inside: avoid;
+  page-break-inside: avoid; /* legacy alias for older PagedJS builds */
+}
+/* Code-listing figures (long prompts, JSON) must split across pages.
+   Flex containers fragment poorly in PagedJS — switch to block. */
+.quarkdown figure.has-codeblock {
+  display: block !important;
+  break-inside: auto !important;
+  page-break-inside: auto !important;
+}
+.quarkdown figure.has-codeblock > .codeblock,
+.quarkdown figure.has-codeblock > .codeblock > .code-line {
+  break-inside: auto !important;
+  page-break-inside: auto !important;
+}
+
+/* PagedJS fragmentation: when a codeblock splits across pages, PagedJS
+   clones the element and marks fragments with data-split-from (continuation)
+   and data-split-to (will continue). Remove borders at the split seam so
+   the listing reads as one continuous block across pages. */
+.quarkdown .codeblock[data-split-to],
+.quarkdown [data-split-to] > .codeblock {
+  border-bottom: none !important;
+  border-bottom-left-radius: 0 !important;
+  border-bottom-right-radius: 0 !important;
+}
+.quarkdown .codeblock[data-split-from],
+.quarkdown [data-split-from] > .codeblock {
+  border-top: none !important;
+  border-top-left-radius: 0 !important;
+  border-top-right-radius: 0 !important;
+}
+
+/* Glossary: the postprocessor (paginate_glossary) splits the glossary into
+   page-sized sub-tables, each tagged class="glossary". Keeping every sub-table
+   atomic means PagedJS never fragments a glossary table — its multi-line-row
+   table fragmentation otherwise leaves continuation pages half-empty (upstream
+   issues #61 / #89 / #149, no CSS workaround). */
+.glossary {
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+/* ----- Long code-block pagination (override Quarkdown screen-mode rule) -
+   Quarkdown's `theme/global.css` sets `.quarkdown pre code { overflow:
+   hidden }` so scrollable monospace boxes work on screen. In print/paged
+   contexts PagedJS reads the overflow-hidden box as "fits in one chunk"
+   and silently clips the overflowing rows when the listing is longer
+   than the remaining page space — empirically reproduced on JSON
+   listings of ~20 lines or more (one dropped entirely, the next rendered
+   from its tail only).
+
+   Make `<pre>` blocks break-aware: keep them togther *when they fit*
+   (avoid an early break), but split across pages when they don't. The
+   `overflow: visible !important` defeats Quarkdown's screen-mode rule
+   so PagedJS sees the full rendered height and paginates honestly.
+
+   This rule lives alongside `.quarkdown table, .quarkdown figure` above
+   because both target Quarkdown's print-pagination edge cases.
+
+   Regression test: `themes/fau-lme/example/main.qd` carries a long-JSON
+   block that exceeds one page; the theme test script verifies that the
+   block renders end-to-end in the produced PDF. */
+/* `postprocess_links/codeblocks.py` rewrites every Quarkdown
+   `<pre><code class="language-X">…</code></pre>` fence into a
+   `<div class="codeblock language-X">` whose children are one
+   `<div class="code-line">` per source line. Block-in-block is the
+   structural shape PagedJS needs to find break points inside long
+   listings — earlier `<pre>` + inner-span / inner-div attempts were
+   denied per-line block boundaries by HTML's phrasing-only rule on
+   `<pre>` and by Chromium's print-pipeline inline coercion. With this
+   wrapper, a 60-row JSON listing paginates across page boundaries
+   instead of being silently clipped. */
+/* Browser-default `figure { margin: 1em 40px }` indents every figure.
+   Quarkdown's global.css only zeros this for `figure:has(> pre)`, but
+   our postprocessor rewrites `<pre><code>` into `<div class="codeblock">`
+   so that selector no longer matches. Zero side margins on ALL figures
+   and stretch flex children so every listing and image uses the full
+   text width. */
+.quarkdown figure {
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  align-items: stretch !important;
+}
+
+.quarkdown .codeblock {
+  align-self: stretch;
+  box-sizing: border-box;
+  font-family: var(--qd-code-font, ui-monospace, "SFMono-Regular",
+                   "Menlo", "Cascadia Mono", "Consolas", monospace);
+  font-size: var(--qd-code-block-font-size);
+  line-height: var(--qd-code-line-height);
+  background-color: transparent;
+  border: 1px solid var(--qd-main-color-muted, rgba(0, 0, 0, 0.15));
+  border-radius: var(--qd-code-border-radius, 4px);
+  padding: 0.6em 0.9em;
+  /* PagedJS fragmentation border fix — see split rules below. */
+  margin-top: var(--qd-block-margin);
+  margin-bottom: var(--qd-block-margin);
+  margin-left: 0;
+  margin-right: 0;
+  width: 100%;
+  max-width: 100%;
+  text-align: left;
+  /* Long listings must split across pages — never atomic. */
+  break-inside: auto;
+  page-break-inside: auto;
+}
+.quarkdown .codeblock .code-line {
+  display: block;
+  /* Preserve leading whitespace as indentation while still permitting
+     line wraps for overly-long rows. */
+  white-space: pre-wrap;
+  word-break: break-word;
+  /* Allow long wrapped lines to split across pages — unwrapped prompt
+     listings can produce code-lines spanning 5+ visual rows. */
+  break-inside: auto;
+  page-break-inside: auto;
+}
+
+/* Syntax highlighting for code listings. `codeblocks.py` tokenizes each
+   listing with Pygments at build time and wraps coloured tokens in
+   `<span class="hl-*">`. The palette is the muted, desaturated FAU/STYLE.md
+   set (reused from thesis/figures/diagrams/STYLE.md) so listings sit in the
+   same visual family as the diagrams and stay legible in greyscale print —
+   the hues are distinguishable by lightness, not only by colour. Untagged
+   tokens (whitespace, plain text) inherit the body ink colour. */
+.quarkdown .codeblock .hl-key     { color: #1e3a8a; }            /* object keys / tags  */
+.quarkdown .codeblock .hl-str     { color: #15803d; }            /* string literals     */
+.quarkdown .codeblock .hl-num     { color: #b45309; }            /* numeric literals    */
+.quarkdown .codeblock .hl-kw      { color: #b91c1c; }            /* keywords/true/null  */
+.quarkdown .codeblock .hl-name    { color: #0f766e; }            /* builtins / commands */
+.quarkdown .codeblock .hl-op,
+.quarkdown .codeblock .hl-punct   { color: #6b7280; }            /* operators / braces  */
+.quarkdown .codeblock .hl-comment { color: #6b7280; font-style: italic; }
+
+.quarkdown figure img,
+.quarkdown figure svg,
+.quarkdown img,
+.quarkdown svg {
+  height: auto;
+}
+
+/* Float-wrapped figures (Quarkdown `.float alignment:{start|end}` emits
+   `<div class="container float" style="float: inline-start;">`). The body
+   text needs room next to the float, so cap the float's width to ~7 cm
+   (≈ 43 % of the 16.2 cm body column) and add a 0.5 cm gutter on the
+   wrap-side. Inline-start / inline-end are the modern logical properties;
+   we also set the physical left / right as a PagedJS-Chromium fallback. */
+.container.float {
+  max-width: 5.5cm;
+  margin-top: 0;
+  margin-bottom: 0.6cm;
+  clear: both;
+}
+.container.float > figure {
+  margin-top: 0;
+}
+.container.float[style*="inline-start"],
+.container.float[style*="float: left"] {
+  float: left !important;
+  margin-right: 0.6cm;
+}
+.container.float[style*="inline-end"],
+.container.float[style*="float: right"] {
+  float: right !important;
+  margin-left: 0.6cm;
+}
+.container.float figure,
+.container.float img,
+.container.float svg {
+  max-width: 100% !important;
+  width: 100%;
+}
+
+/* Caption layout — `<caption>` in `display: table-caption` requires the
+   full !important sledgehammer: Chromium's table-caption sizing algorithm
+   ignores `max-width` percentages, and even an absolute `max-width: 16.2cm`
+   is overridden by the caption's intrinsic min-content unless we also force
+   `min-width: 0` and an explicit `width`. Without all of these together the
+   caption text overflows past the page right margin (verified on Tab 2.2
+   with a 100-char caption: rendered to 519.6pt vs body right edge 515.8pt
+   on odd pages → text clipped at "reasonin" mid-word). */
+.quarkdown caption {
+  display: table-caption !important;
+  caption-side: top !important;
+  width: 16.2cm !important;
+  max-width: 16.2cm !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+  white-space: normal !important;
+  overflow-wrap: break-word !important;
+  /* Right inset so a justified line's final italic glyph is not shaved at the
+     body-column right edge by PagedJS (e.g. the 'l' of 'external'). */
+  padding-right: 3pt !important;
+}
+.quarkdown table th,
+.quarkdown table td {
+  border: none;
+  padding: 0.25em 0.5em;
+  /* Default: break long words only as a last resort, at word boundaries
+     where possible. Keeps natural-language cells like "Pareto existence"
+     readable when the column compresses (no `Pareto / existen / ce`
+     mid-glyph break). */
+  overflow-wrap: break-word;
+  word-break: normal;
+}
+/* Code spans, inline-code identifiers, and KaTeX-rendered math allow
+   break-anywhere — code-style enum values (e.g. `LONG_ENUM_VALUE`) and
+   inline-code paths (e.g. `src/foo/bar_baz`) would otherwise set the
+   column's min-content width to the full token width, forcing the whole
+   table past the page text margin (PagedJS does not auto-shrink). */
+.quarkdown table th code,
+.quarkdown table td code,
+.quarkdown table th .codespan-content,
+.quarkdown table td .codespan-content,
+.quarkdown table th .katex,
+.quarkdown table td .katex {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+/* Bold cells in tables: heavier weight + tiny synthetic stroke so the
+   distinction reads at body size. LM Roman has only one bold weight;
+   `-webkit-text-stroke` (Chromium, PagedJS) thickens it further. */
+.quarkdown table strong {
+  font-weight: 900;
+  -webkit-text-stroke: 0.25px currentColor;
+}
+
+/* Champion row: thin frame top + bottom (marked via [CHAMP] sentinel
+   stripped by postprocess_links/champions.py). */
+.quarkdown table tr.champion td {
+  border-top:    0.8pt solid currentColor;
+  border-bottom: 0.8pt solid currentColor;
+  background: rgba(0, 0, 0, 0.035);
+}
+
+/* Tables break naturally before them. An earlier break-before:avoid tried to
+   keep a table with its introducing paragraph, but PagedJS honours that as a
+   hard constraint: for a table too tall to fit, it forces the break INTO the
+   preceding paragraph (splitting it mid-sentence) and leaves a half-empty page
+   instead of breaking cleanly between paragraph and table. auto lets the break
+   fall before the table, keeping the paragraph whole. */
+.quarkdown table { break-before: auto; }
+
+/* Metric display tables — opt-in via a `tab:metrics-` label prefix
+   (e.g. `ref:{tab:metrics-models}`): metric columns (everything except the
+   first label column) center-aligned in both header and body; first column
+   does not wrap so a configuration label stays on one line. */
+.quarkdown table[id^="tab:metrics-"] th:not(:first-child),
+.quarkdown table[id^="tab:metrics-"] td:not(:first-child) {
+  text-align: center;
+}
+.quarkdown table[id^="tab:metrics-"] td:first-child {
+  white-space: nowrap;
+}
+
+/* Mean row: heavier top rule (booktabs midrule weight) + italic across the
+   row, marked via "Mean" label in the first cell by postprocess_links/mean_row.py.
+   The previous row's hairline bottom (.4pt) is cleared via the .before-mean tag
+   so it does not visually halve the rule under border-collapse. */
+.quarkdown table tr.before-mean td { border-bottom: 0 !important; }
+.quarkdown table tbody tr.mean-row td {
+  border-top: 1.5pt solid #000 !important;
+  font-style: italic;
+}
+
+.quarkdown table thead tr:first-child  th { border-top:    1.0pt solid currentColor; }
+.quarkdown table thead tr:last-child   th { border-bottom: 1.0pt solid currentColor; }
+.quarkdown table tbody tr:last-child   td { border-bottom: 1.0pt solid currentColor; }
+
+/* Body-row separators (readability for multi-line cells): a light hairline
+   under each body row except the last (which already carries the booktabs
+   bottom rule). Lighter and muted than the structural rules above, so it
+   reads as a subordinate separator rather than a full grid. */
+.quarkdown table tbody tr:not(:last-child) td {
+  border-bottom: 0.4pt solid rgba(0, 0, 0, 0.22);
+}
+
+/* Compact bold-only ID cells (FIRST COLUMN only): prevent a short bold
+   identifier (e.g. "A1.1", "B-2", "v1.0") from being broken at punctuation
+   by word-break:break-word above when the column min-width compresses.
+   Pattern target: first-column <td><strong>...</strong></td> (one strong
+   as only child of td). The first-column restriction is critical —
+   without it, ANY single-bold cell elsewhere in the table (e.g. a bold
+   role label in a non-first column) would also get nowrap and consume
+   disproportionate column width, starving the other columns.
+   `:has()` is CSS Level 4, supported by Chromium 105+
+   (PagedJS prints in Chromium). */
+.quarkdown table td:first-child:has(> strong:only-child),
+.quarkdown table td:first-child:has(> span.codespan-content:only-child),
+.quarkdown table th:first-child {
+  white-space: nowrap;
+  word-break: keep-all;
+  overflow-wrap: normal;
+}
+
+/* Bullet styling — match the discreet small dot used by LaTeX `\itemize`
+   default. Stock theme renders a heavier dot that looks visually loud
+   compared to the LaTeX reference. */
+.quarkdown ul > li::marker {
+  color: #000;
+  font-size: 0.85em;
+}
+/* Tighter spacing between bullet and text, and between consecutive items. */
+.quarkdown ul {
+  padding-inline-start: 1.5em;
+}
+.quarkdown ul > li {
+  padding-left: 0.25em;
+  margin-block: 0.15em;
+}
+
+/* Code blocks: smaller and tighter than body */
+.quarkdown code,
+.quarkdown pre,
+.quarkdown kbd,
+.quarkdown samp {
+  font-size: 10.5pt;
+  line-height: 1.35;
+}
+
+/* Two-line chapter heading — mirrors LaTeX report.cls \@makechapterhead:
+     \vspace*{50pt} \huge\bfseries "Chapter N" \vskip 20pt \Huge\bfseries Title \vskip 40pt
+   At 12 pt body, size12.clo defines BOTH \huge and \Huge as 25 pt — so the
+   "Chapter N" prefix and the title render at the same point size in LaTeX
+   (visual hierarchy comes from the line break, not from a size difference).
+   Earlier iteration had the prefix at 0.83em which made it visibly smaller
+   than the title — corrected to 1em for LaTeX parity.
+   The chapter-word ("Chapter " / "Kapitel ") is driven by a CSS variable set
+   per <html lang="..."> below.
+   Appendix h1s skip this rule — they emit their own "Appendix X — Title" string. */
+.quarkdown h1[data-location]:not([id^="appendix-"]) {
+  font-size: 25pt;
+  font-weight: bold;
+  /* margin-top 80pt instead of LaTeX's 50pt to compensate for our running header
+     on chapter-open pages — LaTeX uses `plain` pagestyle there so the header area
+     is empty; we keep the header (per user preference) and add ~30pt to maintain
+     the visual top drop similar to the LaTeX reference. */
+  margin-top: 80pt;
+  margin-bottom: 40pt;
+}
+
+/* Force every chapter to start on a recto (right / odd-numbered) page,
+   mirroring LaTeX `\cleardoublepage` (lmedoc.cls:69-70). PagedJS inserts a
+   blank verso if the natural flow would land the chapter on an even/verso
+   page. Without this, chapters land on whatever page the flow reaches,
+   producing mirror-flipped margins (inner ↔ outer swap on even/odd) —
+   verified pre-fix via pixel-measurement against the LME LaTeX reference.
+   Targets the chapter h1 (which has class="page-break" emitted by
+   Quarkdown for plain '# Title' headings) and excludes appendix h1s. */
+/* Note on recto/verso for chapter openings:
+   LaTeX `lmedoc.cls` uses `\cleardoublepage` (cls:69-70) to ensure each
+   chapter starts on a recto (right / odd) page, with mirrored asymmetric
+   margins (inner = binding, outer = wider).
+   Quarkdown 2.0.1 + PagedJS does NOT honor `break-before: right` here —
+   verified empirically: `.page-break { break-before: right !important; }`
+   produces no observable effect on PagedJS's recto/verso decision, so the
+   chapter lands wherever the natural page-flow reaches. The asymmetric
+   `.pageformat side:{right|left}` declarations in metadata.qd still apply
+   (each side gets correct inner/outer geometry), but the CHAPTER position
+   relative to recto/verso is page-flow-driven.
+   Net visual effect: chapters that happen to land on a verso page will
+   show outer-margin on the left and inner-margin on the right — flipped
+   from the LaTeX reference for those specific pages. For electronic
+   submission this is acceptable; for printed binding it should be revisited
+   once Quarkdown exposes per-element recto-forcing or per-pagebreak class
+   names. See "Quarkdown-specific gotchas" in the README. */
+.quarkdown h1[data-location]:not([id^="appendix-"])::before {
+  content: var(--lme-chapter-word, "Chapter ") attr(data-location);
+  display: block;
+  font-size: 1em;
+  font-weight: bold;
+  margin-bottom: 20pt;
+}
+
+/* Section / subsection / subsubsection sizes — match LaTeX report.cls + size12.clo
+   at 12pt body:
+     section        \Large = 17pt
+     subsection     \large = 14pt
+     subsubsection  \normalsize = 12pt (kept bold for hierarchy)
+   Stock Quarkdown latex theme uses similar but not exact sizes; we pin explicitly
+   so the rendered heading scale matches the LaTeX reference 1:1.
+   Excludes appendix descendants (which use the same sizes but skip auto-numbers). */
+.quarkdown h2:not([data-decorative]) {
+  font-size: 17pt;
+  font-weight: bold;
+}
+.quarkdown h3 {
+  font-size: 14pt;
+  font-weight: bold;
+}
+.quarkdown h4,
+.quarkdown h5,
+.quarkdown h6 {
+  font-size: 12pt;
+  font-weight: bold;
+}
+
+/* Localize the chapter prefix per document language (LaTeX `\chaptername`).
+   Quarkdown sets <html lang="en"|"de"> based on `.doclang`. Default is English. */
+html[lang="de"] .quarkdown { --lme-chapter-word: "Kapitel "; }
+html[lang="en"] .quarkdown,
+html:not([lang]) .quarkdown { --lme-chapter-word: "Chapter "; }
+
+/* Front-matter headings — emitted by `#! Title` in Quarkdown 2.0.1 as
+   <h1 data-decorative="">. These are unnumbered, excluded from ToC, and used
+   for Abstract / Übersicht / Acknowledgments / Acronyms / Notation / List of *.
+   Style as small centered bold (matches the LaTeX `report.cls` convention for
+   abstract/acknowledgments and the LME guideline for the lists). The chapter
+   `::before` rule above does NOT match these (no [data-location]), so they
+   stay clean of the "Chapter N" prefix. */
+.quarkdown h1[data-decorative] {
+  font-size: 14pt;
+  font-weight: bold;
+  text-align: center;
+  margin-top: 1em;
+  margin-bottom: 1.5em;
+}
+
+/* Appendix numbering (Fix 4) — Quarkdown's .numbering is global, so appendix
+   chapters get arabic 12-16. The .qd source uses "Appendix A — Title" verbatim
+   in the heading text, so we just suppress the auto-number prefix on appendix
+   h1s + their ToC <li> entries. Sub-section numbers (12.1, 12.2, ...) inside
+   appendices are also suppressed; the section title alone is shown.
+
+   This mirrors LaTeX \appendix in spirit: the user-visible label becomes
+   "Appendix A" / "Appendix B" / ... (already typed in the source) instead of
+   chapter numbers 12-16. */
+/* The `data-target-id` attribute on ToC <li> elements is a Quarkdown 2.0.1
+   internal: each ToC entry carries `data-target-id="<heading-id>"` mirroring
+   the heading's `id`. We rely on this to suppress the auto-number prefix on
+   appendix ToC entries by prefix-matching `appendix-`. If a future Quarkdown
+   release renames or removes this attribute, the appendix ToC entries will
+   silently regain their chapter-number prefix — revisit on Quarkdown upgrade. */
+.quarkdown h1[id^="appendix-"]::before,
+.quarkdown [data-target-id^="appendix-"]::before,
+/* Robust fallback: an appendix heading with a CUSTOM id (e.g.
+   `{#app:quest-rubric}`) does not match the `appendix-` prefix above, so it
+   would regain its "Chapter 14" auto-number. Container-scoping catches it
+   regardless of id. The ToC `<li>` for such a heading lives outside the
+   `.appendix` container, so postprocess_links/crossrefs.py tags it with
+   `appendix-toc-entry` and we suppress that here too. */
+.quarkdown .appendix h1[data-location]::before,
+.quarkdown li.appendix-toc-entry::before {
+  content: none !important;
+}
+/* Sub-section auto-numbers inside appendices — h2 / h3 / li auto-prefixes are
+   suppressed so "Critic Prompt" shows verbatim instead of "12.1 Critic Prompt".
+   Scoped via the `.appendix` container wrapper in main.qd, NOT chapter indices,
+   so adding/removing body chapters does not break the rule. */
+.quarkdown .appendix h2::before,
+.quarkdown .appendix h3::before,
+.quarkdown .appendix li::before {
+  content: none !important;
+}
+
+/* Cover page — single-spaced like LaTeX `\baselinestretch=1.0` inside the
+   `\bgroup` of `\deckblatt` (lmedoc.cls:84). The body of the document is 1.5×
+   spaced via Quarkdown's default; the cover scope overrides that locally. */
+.quarkdown .lmecover,
+.quarkdown .lmecover-trailer {
+  line-height: 1.0;
+}
+
+/* Cover trailer — strip link styling. Advisor names may be wrapped in
+   external `[text](url)` to give the PDF clickable advisor links, but the
+   cover should still read as a typographically clean LaTeX-style block: no
+   magenta colour, no underline. Specificity (0,2,2) beats both the external
+   `a[href^="http"]` (0,2,1) and the stock theme `a` rule. */
+.quarkdown .lmecover-trailer a[href^="http"],
+.quarkdown .lmecover-trailer a[href^="#"] {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* Logo row fix: Quarkdown 2.0.1 wraps the two `!(...)[...](path)` images on
+   consecutive lines into a single `<p>` element inside `.stack stack-row`.
+   The result is one flex-item (the `<p>`) containing both images inline —
+   so the `gap:{6cm}` declared on the `.row` is ignored and the logos
+   cluster on the left. We promote the inner `<p>` to a flex container so
+   its two `<img>` children become the actual flex items separated by gap
+   and aligned at the top, mirroring LaTeX `\hspace{6cm}` in lmedoc.cls:101. */
+.quarkdown .lmecover .stack.stack-row > p {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: flex-start !important;
+  column-gap: 6cm !important;
+  margin: 0 !important;
+  width: 100% !important;
+}
+
+/* Cover page (page 1) — suppress page number `i` in the top-outer corner.
+   `.pagemargin {topoutsidecorner} .currentpage` in main.qd applies globally
+   (Quarkdown 2.0.1 has no per-page filter on `.pagemargin`). PagedJS does NOT
+   route Quarkdown's margin-content through standard `@page :first` rules —
+   instead it inserts `.page-margin-content` divs into per-page DOM nodes
+   identified by `data-page-number`. So we hide every margin-content child of
+   page 1 directly. Mirrors LaTeX `\thispagestyle{empty}` (lmedoc.cls:98). */
+.pagedjs_page[data-page-number="1"] .page-margin-content {
+  display: none !important;
+}
+
+/* Pixel-tune the cover title and thesis-type sizes to match LaTeX exactly.
+   Quarkdown's named sizes (`large`, `medium`) in the latex layout theme render
+   visually larger than the LaTeX equivalents (\Large = 17.28pt, \large = 14.4pt
+   at 12pt base), so we pin the absolute pt values inside the cover scope only. */
+.quarkdown .lmecover .size-large {
+  font-size: 17.28pt;
+  line-height: 1.15;
+}
+.quarkdown .lmecover .size-medium {
+  font-size: 14.4pt;
+}
+
+/* Running header (top-outer) — italic small-caps per LaTeX \pagestyle{headings}.
+   Page number (top-outer corner) stays upright. Some horizontal padding keeps the
+   two margin slots from colliding (e.g. '4Introduction' on even pages or
+   'Background5' on odd pages — they share the top edge).
+   Vertical positioning: LaTeX places the header at ~2.6cm from paper top
+   (top=3.8cm body top, headsep~0.88cm, headheight~0.42cm above body).
+   Quarkdown by default sits the header at the very top of the margin area
+   (~1.7cm from paper top), which leaves a visible gap between header and
+   body. We push the header DOWN with padding-top to land at ~2.6cm from
+   paper top, matching the LaTeX reference.
+   `line-height: 1.0` on both slots ensures the running-header text and the
+   page-number sit on the same baseline despite different font-style stacks
+   (small-caps + italic vs. plain). Without this, `xvii` rendered visibly
+   higher than the text in the adjacent slot. */
+.quarkdown .page-margin-top-outside {
+  font-variant: small-caps;
+  font-style: italic;
+  font-size: 10pt;
+  line-height: 1.0;
+  padding: 1.35cm 1.5em 0;
+}
+.quarkdown .page-margin-top-outside-corner {
+  font-size: 10pt;
+  line-height: 1.0;
+  padding-top: 1.35cm;
+}
+
+/* Long chapter titles in `.pagemargin {topoutside}` were wrapping to 2-3 lines
+   because PagedJS distributes `.pagedjs_margin-top` into 3 equal-width slots
+   (paged.polyfill.js:27021 — `grid-template-columns: repeat(3, 1fr)`), so a
+   long chapter heading only gets 1/3 of body width (~5.4cm at A4 with this
+   margin geometry, against a 9cm-wide text-run at 10pt italic small-caps).
+   The inside + center slots are unused in this theme (`main.qd` emits content
+   only in `topoutside` + `topoutsidecorner`), so we collapse them to 0fr and
+   hand the full body width to the outside slot — mirroring LaTeX
+   `\fancyhead[RO]/[LE]` behaviour where the header spans the full outer-margin
+   area. Recto pages: outside = right slot; verso pages: outside = left slot. */
+.pagedjs_right_page .pagedjs_margin-top {
+  grid-template-columns: 0fr 0fr 1fr;
+}
+.pagedjs_left_page .pagedjs_margin-top {
+  grid-template-columns: 1fr 0fr 0fr;
+}
+
+/* Suppress the running header on front-matter pages.
+   LaTeX uses `\pagestyle{plain}` for front-matter (ToC, list-of-*, abstracts,
+   etc.) — only a centered page number, no chapter-title header. Quarkdown's
+   `.pagemargin {topoutside}` directive in main.qd applies globally (no per-
+   page filter), so PagedJS would emit the running header on every page,
+   including front-matter — where the `lastheading` resolves to whichever
+   front-matter `#!` heading happened to be most recent ("Table of Contents",
+   "Acronyms", …) and looks wrong.
+   Front-matter spans physical pages 2..N where N is the last front-matter
+   page (currently page 17 = roman xvii). Page 1 is the cover (entire
+   margin already suppressed above). The page-number itself stays visible.
+   IMPORTANT: if front-matter pagecount changes (e.g. ToC grows when more
+   chapters are added), the `n` in `:nth-child` must be updated, or this list
+   must be extended. A future fix could use a Quarkdown-emitted body-class
+   on body chapters to scope this without a hard-coded page range. */
+.pagedjs_page[data-page-number="2"]  .page-margin-top-outside,
+.pagedjs_page[data-page-number="3"]  .page-margin-top-outside,
+.pagedjs_page[data-page-number="4"]  .page-margin-top-outside,
+.pagedjs_page[data-page-number="5"]  .page-margin-top-outside,
+.pagedjs_page[data-page-number="6"]  .page-margin-top-outside,
+.pagedjs_page[data-page-number="7"]  .page-margin-top-outside,
+.pagedjs_page[data-page-number="8"]  .page-margin-top-outside,
+.pagedjs_page[data-page-number="9"]  .page-margin-top-outside,
+.pagedjs_page[data-page-number="10"] .page-margin-top-outside,
+.pagedjs_page[data-page-number="11"] .page-margin-top-outside,
+.pagedjs_page[data-page-number="12"] .page-margin-top-outside,
+.pagedjs_page[data-page-number="13"] .page-margin-top-outside,
+.pagedjs_page[data-page-number="14"] .page-margin-top-outside,
+.pagedjs_page[data-page-number="15"] .page-margin-top-outside,
+.pagedjs_page[data-page-number="16"] .page-margin-top-outside,
+.pagedjs_page[data-page-number="17"] .page-margin-top-outside {
+  display: none !important;
+}
+
+/* List of Figures / List of Tables (rendered by postprocess_links/listings.py). */
+table.lme-listing { width: 100%; border-collapse: collapse; }
+/* Override the global `.quarkdown table { break-inside: avoid }` rule: a listing
+   that doesn't fit under its heading must START there and flow onto the next
+   page, NOT jump as one atomic block (which left the heading page blank).
+   Same longtable pattern as #glossary. */
+table.lme-listing {
+  break-inside: auto;
+  page-break-inside: auto;
+}
+table.lme-listing td { border: none; padding: 0.2em 0; vertical-align: top; }
+table.lme-listing td.loc { width: 3em; }
+table.lme-listing td.page { width: 3em; text-align: right; }
+/* Page number: the page cell holds an <a href="#id"> whose text print-pdf.js
+   fills with the target's rendered page number (resolved via .pagedjs_page).
+   PagedJS' CSS target-counter(attr(href url)) is unreliable in this build, so
+   we mirror the same DOM-side technique the ToC page-number pass uses.
+   text-align:right above keeps the number flush right. */
+
+/* Acronyms table: same longtable treatment so it begins right under the
+   "Acronyms" heading instead of being pushed to the next page as one block. */
+.quarkdown h1#acronyms + table {
+  break-inside: auto;
+  page-break-inside: auto;
+}

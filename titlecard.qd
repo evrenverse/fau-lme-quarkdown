@@ -1,0 +1,57 @@
+<!-- .lmetitlecard: official LME title slide (PP-FAU-LME-2Logo look).
+     Full-bleed: metallic band on top (white institution text left, PRL +
+     FAU Wortmarke right), swirl background below, white left-aligned
+     title block. Positioning and colors live in slides.css (.lmetitlecard,
+     .lmeband*, .lmetitle-block).
+     `advisor` is optional: omit it to suppress the advisor line entirely.
+     The consumer calls .lmeslidesfooter AFTER this call (on the first
+     content slide), so the title slide stays margin-free.
+     Note the `\:` in the advisor line: as the first line of the .ifnot
+     body lambda, an unescaped `Advisor:` prefix would be parsed as a
+     lambda parameter declaration and crash the call
+     (InvalidLambdaArgumentCountException).
+     `title` and `chair` accept multi-line values via `.br`. They render
+     inside block containers (NOT inline `.text` spans): a `.br`-bearing
+     argument emits a paragraph, and a `<p>` inside a `.text` span is
+     invalid HTML whose parser repair strips the size class and breaks
+     the layout in the print/PDF path. -->
+.function {lmetitlecard}
+    title author event advisor? chair date:
+
+    .container fullwidth:{yes} classname:{lmetitlecard}
+
+        .container classname:{lmetitle-bg}
+            ![Swirl title background, FAU corporate design](assets/slides-title-bg.jpg)
+
+        .container classname:{lmeband}
+            .row alignment:{spacebetween} cross:{center}
+                .container classname:{lmeband-text}
+                    Friedrich-Alexander-Universität .br Technische Fakultät
+
+                .container classname:{lmeband-logos}
+                    .row cross:{center}
+                        !(3.2cm)[Pattern Recognition Lab](assets/logo-prl.png)
+
+                        !(2.4cm)[FAU](assets/logo-fau-wortmarke.svg)
+
+        .container classname:{lmetitle-block}
+            .container classname:{size-large}
+                .title
+
+            .whitespace height:{0.5cm}
+
+            .text {.event} size:{medium}
+
+            .whitespace height:{0.7cm}
+
+            .text {.author} weight:{bold}
+
+            .whitespace height:{0.4cm}
+
+            .ifnot {.advisor::isnone}
+                Advisor\: .advisor
+
+                .whitespace height:{0.4cm}
+
+            .container classname:{size-small}
+                .chair .br .date

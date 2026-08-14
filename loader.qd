@@ -1,0 +1,22 @@
+<!-- Activate stock theme base (paperwhite color + latex layout) -->
+.theme color:{paperwhite} layout:{latex}
+
+<!-- Theme CSS: hyperlink colors, captions, booktabs tables, code typography.
+     Use inline-arg form .css {.read {...}} (NOT body form, which emits the
+     literal .read text into <style> — verified bug in Quarkdown 2.0.1). -->
+.css {.read {styles.css}}
+
+<!-- Localization tables (EN/DE) for cover labels -->
+.include {localization.qd}
+
+<!-- Math macros (visible subset of LME math.sty) -->
+.include {math.qd}
+
+<!-- Caption positions (figures bottom, tables top per LME convention) -->
+.include {captions.qd}
+
+<!-- Bibliography wrapper around .bibliography + custom CSL -->
+.include {bibliography.qd}
+
+<!-- Cover page function -->
+.include {cover.qd}

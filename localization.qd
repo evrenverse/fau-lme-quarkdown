@@ -1,0 +1,55 @@
+<!-- Override the stdlib `std.section` localisation key so `.ref` to a heading
+     emits "Chapter N" (complete clickable phrase) instead of "Section N".
+     Quarkdown 2.0.1 has no depth-specific override — all heading depths share
+     the same `section` key — so this turns *every* heading-ref into "Chapter N",
+     including subsection refs (which would otherwise read "Section 1.2.3").
+     We accept this trade-off: in the thesis prose, heading-refs almost always
+     point at chapter-level headings; the few subsection refs read fine as
+     "Chapter 1.2" given the leading number already disambiguates depth.
+     The whole "Chapter N" phrase is one `<a>` element — `.ref` produces
+     `<a href="#id">Chapter N</a>` in this configuration, so it renders as a
+     single clickable unit (verified empirically against Reference.kt source
+     and PDF output 2026-05-14). -->
+.localization {std} merge:{yes}
+    - English
+      - section: Chapter
+    - German
+      - section: Kapitel
+
+.localization {lme}
+    - English
+      - thesistype_mt: Master's Thesis in Computer Science
+      - thesistype_bt: Bachelor's Thesis in Computer Science
+      - thesistype_sa: Student Thesis in Computer Science
+      - thesistype_pa: Project in Computer Science
+      - thesistype_fp: Forschungspraktikum in Computer Science
+      - thesistype_diss: Dissertation in Informatik
+      - submitted_by: submitted by
+      - born_on: born
+      - born_in: in
+      - written_at: Written at
+      - in_cooperation: in Cooperation with
+      - lehrstuhl: Lehrstuhl für Mustererkennung (Informatik 5)
+      - department: Department Informatik
+      - university: Friedrich-Alexander-Universität Erlangen-Nürnberg (FAU)
+      - advisor: Advisor
+      - started: Started
+      - finished: Finished
+    - German
+      - thesistype_mt: Master's Thesis im Fach Informatik
+      - thesistype_bt: Bachelor's Thesis im Fach Informatik
+      - thesistype_sa: Studienarbeit im Fach Informatik
+      - thesistype_pa: Projektarbeit im Fach Informatik
+      - thesistype_fp: Forschungspraktikum im Fach Informatik
+      - thesistype_diss: Dissertation im Fach Informatik
+      - submitted_by: vorgelegt von
+      - born_on: Geboren am
+      - born_in: in
+      - written_at: Angefertigt am
+      - in_cooperation: in Zusammenarbeit mit
+      - lehrstuhl: Lehrstuhl für Mustererkennung (Informatik 5)
+      - department: Department Informatik
+      - university: Friedrich-Alexander-Universität Erlangen-Nürnberg (FAU)
+      - advisor: Betreuer
+      - started: Beginn der Arbeit
+      - finished: Abgabe der Arbeit

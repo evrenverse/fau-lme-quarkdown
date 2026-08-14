@@ -1,0 +1,153 @@
+.doctype {paged}
+.include {metadata.qd}
+.include {../loader.qd}
+
+.formatpagenumber {i}
+
+.lmecover \
+    title:{Example Thesis Title for the FAU-LME Quarkdown Theme} \
+    author:{Sample Author} \
+    birthdate:{1. Januar 2000} \
+    birthplace:{Example City} \
+    advisor:{Advisor Name} \
+    started:{1. Januar 2026} \
+    finished:{30. Juni 2026} \
+    doctype:{mt}
+
+.pagemargin {topoutsidecorner}
+    .currentpage
+
+#! Abstract
+
+This is a one-paragraph example abstract that demonstrates the small centered
+bold heading style used for unnumbered front-matter sections.
+
+.formatpagenumber {1}
+.resetpagenumber {1}
+
+.pagemargin {topoutside}
+    *.lastheading depth:{1}*
+
+# Introduction
+
+This chapter exercises the two-line chapter-opening layout: "Chapter N" prefix
+above the bold title with the LaTeX-equivalent vertical drop.
+
+## Math macros
+
+Inline math: $ \mat{A} \transp{\vec{x}} = \vec{b} $ where $ \vec{x} \in \real^n $.
+
+Display math:
+
+$$$
+\argmax_{\theta \in \integers} \mathcal{L}(\theta) = \sum_{i=1}^{n} \norm{\hat{x}_i - x_i}
+$$$
+
+## A bullet list
+
+- First item with the discreet small-bullet marker.
+- Second item.
+- Third item.
+
+## A booktabs-style table
+
+| Method | Result | Notes |
+|---|---|---|
+| Baseline | 0.72 | reference |
+| Proposed | 0.91 | this work |
+
+## A citation
+
+Per Peffers .cite {peffers2007dsr} the artifact-centric approach is appropriate.
+
+## A long fenced code block (regression: page-spanning `<pre>`)
+
+The block below exists to verify that long fenced code blocks paginate
+across page boundaries instead of being clipped or dropped (theme v0.2.1
+fix in `styles.css` overrides Quarkdown's screen-mode
+`pre code { overflow: hidden }`). A theme consumer rebuilding this
+example should see all rows from `row_1` through `row_60` in the
+produced PDF; if any row is missing, the override regressed.
+
+```json
+{
+  "long_listing_regression": {
+    "purpose": "verify that pre/code blocks longer than a page split correctly",
+    "rows": [
+      {"id": "row_1",  "value": 1,  "label": "alpha"},
+      {"id": "row_2",  "value": 2,  "label": "beta"},
+      {"id": "row_3",  "value": 3,  "label": "gamma"},
+      {"id": "row_4",  "value": 4,  "label": "delta"},
+      {"id": "row_5",  "value": 5,  "label": "epsilon"},
+      {"id": "row_6",  "value": 6,  "label": "zeta"},
+      {"id": "row_7",  "value": 7,  "label": "eta"},
+      {"id": "row_8",  "value": 8,  "label": "theta"},
+      {"id": "row_9",  "value": 9,  "label": "iota"},
+      {"id": "row_10", "value": 10, "label": "kappa"},
+      {"id": "row_11", "value": 11, "label": "lambda"},
+      {"id": "row_12", "value": 12, "label": "mu"},
+      {"id": "row_13", "value": 13, "label": "nu"},
+      {"id": "row_14", "value": 14, "label": "xi"},
+      {"id": "row_15", "value": 15, "label": "omicron"},
+      {"id": "row_16", "value": 16, "label": "pi"},
+      {"id": "row_17", "value": 17, "label": "rho"},
+      {"id": "row_18", "value": 18, "label": "sigma"},
+      {"id": "row_19", "value": 19, "label": "tau"},
+      {"id": "row_20", "value": 20, "label": "upsilon"},
+      {"id": "row_21", "value": 21, "label": "phi"},
+      {"id": "row_22", "value": 22, "label": "chi"},
+      {"id": "row_23", "value": 23, "label": "psi"},
+      {"id": "row_24", "value": 24, "label": "omega"},
+      {"id": "row_25", "value": 25, "label": "alpha-2"},
+      {"id": "row_26", "value": 26, "label": "beta-2"},
+      {"id": "row_27", "value": 27, "label": "gamma-2"},
+      {"id": "row_28", "value": 28, "label": "delta-2"},
+      {"id": "row_29", "value": 29, "label": "epsilon-2"},
+      {"id": "row_30", "value": 30, "label": "zeta-2"},
+      {"id": "row_31", "value": 31, "label": "eta-2"},
+      {"id": "row_32", "value": 32, "label": "theta-2"},
+      {"id": "row_33", "value": 33, "label": "iota-2"},
+      {"id": "row_34", "value": 34, "label": "kappa-2"},
+      {"id": "row_35", "value": 35, "label": "lambda-2"},
+      {"id": "row_36", "value": 36, "label": "mu-2"},
+      {"id": "row_37", "value": 37, "label": "nu-2"},
+      {"id": "row_38", "value": 38, "label": "xi-2"},
+      {"id": "row_39", "value": 39, "label": "omicron-2"},
+      {"id": "row_40", "value": 40, "label": "pi-2"},
+      {"id": "row_41", "value": 41, "label": "rho-2"},
+      {"id": "row_42", "value": 42, "label": "sigma-2"},
+      {"id": "row_43", "value": 43, "label": "tau-2"},
+      {"id": "row_44", "value": 44, "label": "upsilon-2"},
+      {"id": "row_45", "value": 45, "label": "phi-2"},
+      {"id": "row_46", "value": 46, "label": "chi-2"},
+      {"id": "row_47", "value": 47, "label": "psi-2"},
+      {"id": "row_48", "value": 48, "label": "omega-2"},
+      {"id": "row_49", "value": 49, "label": "alpha-3"},
+      {"id": "row_50", "value": 50, "label": "beta-3"},
+      {"id": "row_51", "value": 51, "label": "gamma-3"},
+      {"id": "row_52", "value": 52, "label": "delta-3"},
+      {"id": "row_53", "value": 53, "label": "epsilon-3"},
+      {"id": "row_54", "value": 54, "label": "zeta-3"},
+      {"id": "row_55", "value": 55, "label": "eta-3"},
+      {"id": "row_56", "value": 56, "label": "theta-3"},
+      {"id": "row_57", "value": 57, "label": "iota-3"},
+      {"id": "row_58", "value": 58, "label": "kappa-3"},
+      {"id": "row_59", "value": 59, "label": "lambda-3"},
+      {"id": "row_60", "value": 60, "label": "mu-3"}
+    ]
+  }
+}
+```
+
+# Second Chapter
+
+A second chapter to verify the running header updates correctly between
+chapters and that page-numbering continues sequentially.
+
+<!-- Smoke-test note: this in-repo example references the theme via `../loader.qd`
+     (theme at repo root), so it does NOT reproduce the consumer layout
+     `<docroot>/themes/fau-lme/`. The `.lmebibliography` wrapper hard-codes a `../../`
+     prefix that assumes that consumer layout, so here we call `.bibliography`
+     directly with the theme's CSL style. Real projects (main.qd at `<docroot>/main.qd`
+     + theme at `<docroot>/themes/fau-lme/`) use `.lmebibliography {refs.bib}` — see README. -->
+.bibliography {refs.bib} style:{lme-alpha} title:{References}

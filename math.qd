@@ -1,0 +1,54 @@
+<!-- LME math macros, visible-subset port of lmedoc/math.sty.
+     Inline math syntax in chapter text: $ \mat{A} \transp{\vec{x}} $
+     (whitespace around $ is mandatory).
+     For display math, use $$$ … $$$ (triple-dollar fenced block). -->
+
+<!-- Vectors and matrices: LME uses bold-italic for both (NOT arrow accents) -->
+.texmacro {\vec}
+    \boldsymbol{#1}
+
+.texmacro {\mat}
+    \boldsymbol{#1}
+
+<!-- Linear-algebra operations -->
+.texmacro {\transp}
+    {#1}^{\mathrm{T}}
+
+.texmacro {\norm}
+    \lVert #1 \rVert
+
+.texmacro {\abs}
+    \lvert #1 \rvert
+
+<!-- Number sets (blackboard-bold) -->
+.texmacro {\real}
+    \mathbb{R}
+
+.texmacro {\nat}
+    \mathbb{N}
+
+.texmacro {\integers}
+    \mathbb{Z}
+
+.texmacro {\complex}
+    \mathbb{C}
+
+.texmacro {\rationals}
+    \mathbb{Q}
+
+<!-- Optimization operators -->
+.texmacro {\argmax}
+    \operatorname*{arg\,max}
+
+.texmacro {\argmin}
+    \operatorname*{arg\,min}
+
+<!-- Floor / ceiling / asymptotic complexity -->
+.texmacro {\floor}
+    \left\lfloor #1 \right\rfloor
+
+.texmacro {\ceil}
+    \left\lceil  #1 \right\rceil
+
+.texmacro {\bigO}
+    \mathrm{O}\!\left(#1\right)

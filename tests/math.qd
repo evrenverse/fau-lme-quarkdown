@@ -1,0 +1,72 @@
+.doctype {paged}
+
+.docname {Math macros smoke test}
+.docauthor {fau-lme theme test suite}
+.doclang {english}
+
+.font main:{LM Roman 12} heading:{LM Roman 12} size:{12pt}
+
+.include {../math.qd}
+
+# Math macros — exhaustive smoke test
+
+This document calls every macro defined in `themes/fau-lme/math.qd` so that a
+breaking change in Quarkdown's KaTeX bridge or in our `.texmacro` definitions
+fails the build instead of silently producing the wrong glyph.
+
+## Vectors and matrices
+
+Inline: $ \vec{x} $, $ \vec{\alpha} $, $ \mat{A} $, $ \mat{\Sigma} $.
+
+Display:
+
+$$$
+\mat{A} \vec{x} = \vec{b}, \qquad \mat{A} \in \real^{m \times n}, \vec{x} \in \real^{n}
+$$$
+
+## Linear-algebra ops
+
+Inline: $ \transp{\mat{A}} $, $ \norm{\vec{x}} $, $ \abs{x} $.
+
+Display:
+
+$$$
+\norm{\mat{A} \vec{x} - \vec{b}}^{2} = \transp{(\mat{A} \vec{x} - \vec{b})} (\mat{A} \vec{x} - \vec{b})
+$$$
+
+## Number sets
+
+Inline: $ \real $, $ \nat $, $ \integers $, $ \complex $, $ \rationals $.
+
+Display:
+
+$$$
+\nat \subset \integers \subset \rationals \subset \real \subset \complex
+$$$
+
+## Optimization operators
+
+Display:
+
+$$$
+\hat{\theta} = \argmax_{\theta \in \integers} \mathcal{L}(\theta), \qquad \hat{\theta}_{\mathrm{MSE}} = \argmin_{\theta \in \real^{n}} \norm{y - f(x; \theta)}^{2}
+$$$
+
+## Floor, ceiling, big-O
+
+Inline: $ \floor{x} $, $ \ceil{x} $, $ \bigO{n^{2}} $.
+
+Display:
+
+$$$
+\bigO{n \log n} \le \bigO{n^{2}} \le \bigO{2^{n}}, \qquad \floor{x + \tfrac{1}{2}} \approx \ceil{x - \tfrac{1}{2}}
+$$$
+
+## Composition stress test
+
+A compound expression that uses many macros at once — if KaTeX swallows one
+silently this will look wrong:
+
+$$$
+\hat{\vec{x}} = \argmin_{\vec{x} \in \real^{n}} \left[ \norm{\mat{A} \vec{x} - \vec{b}}^{2} + \lambda \abs{\transp{\vec{x}} \mat{A} \vec{x}} \right] \quad \text{with complexity } \bigO{n^{3}}
+$$$
