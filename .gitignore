@@ -16,3 +16,6 @@ quarkdown-output/
 
 # Local project card — not part of the published repository.
 PROJECT.md
+
+# machine-local skill symlinks (absolute paths, not portable)
+.agents/skills/quarkdown
