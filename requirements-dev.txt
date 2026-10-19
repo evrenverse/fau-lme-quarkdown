@@ -1,4 +1,4 @@
 -r requirements.txt
 
-pytest>=8.0
-pypdf>=5.0           # tests/smoke-postprocess.sh: counts PDF link annotations
+pytest>=9.1.1
+pypdf>=6.21.0           # tests/smoke-postprocess.sh: counts PDF link annotations
